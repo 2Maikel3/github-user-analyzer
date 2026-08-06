@@ -1,30 +1,80 @@
 import sys
-from api import get_user, get_repositories
-from analysis import get_total_stars, get_most_starred_repository
+
+from api import get_repositories, get_user
+from analysis import generate_report
+from output import (
+    export_all,
+    print_generated_files,
+    print_report,
+)
+from transform import repositories_to_dataframe
+from visualization import generate_all_figures
+
 
 def main() -> None:
+    """
+    Main entry point.
+    """
 
     if len(sys.argv) != 2:
-        print("Usage: python src/main.py <github_username>")
+        print("Usage:")
+        print("python src/main.py <github_username>")
         sys.exit(1)
 
     username = sys.argv[1]
 
-    user = get_user(username)
+    try:
 
-    print("GitHub User Information")
-    print("-----------------------")
-    print("Username        :", user["login"] or "Not specified")
-    print("Name            :", user["name"] or "Not specified")
-    print("Public Repos    :", user["public_repos"])
-    print("Followers       :", user["followers"])
-    print("Following       :", user["following"])
+        print("Fetching GitHub data...")
 
-    repositories = get_repositories(username)
+        user = get_user(username)
 
-    total_stars = get_total_stars(repositories)
+        repositories = get_repositories(username)
 
-    best_repo = get_most_starred_repository(repositories)
+        print("Transforming data...")
 
-if __name__ == '__main__':
+        dataframe = repositories_to_dataframe(repositories)
+
+        print("Analyzing repositories...")
+
+        report = generate_report(
+            user,
+            repositories,
+        )
+
+        print("Generating figures...")
+
+        generate_all_figures(dataframe)
+
+        print("Exporting files...")
+
+        export_all(
+            report,
+            dataframe,
+        )
+
+        print_report(report)
+
+        print_generated_files()
+
+        print("\nAnalysis completed successfully!")
+
+    except ValueError as error:
+
+        print(f"\nError: {error}")
+
+    except RuntimeError as error:
+
+        print(f"\nAPI Error: {error}")
+
+    except KeyboardInterrupt:
+
+        print("\nExecution cancelled.")
+
+    except Exception as error:
+
+        print(f"\nUnexpected error: {error}")
+
+
+if __name__ == "__main__":
     main()

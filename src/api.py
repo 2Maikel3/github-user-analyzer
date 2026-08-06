@@ -6,18 +6,19 @@ TIMEOUT = 10
 
 def _make_request(url: str) -> dict | list:
     """
-    Perform a GET request to the GitHub API.
+    Perform a GET request to the GitHub REST API.
 
     Args:
-        url: Endpoint URL.
+        url: API endpoint.
 
     Returns:
-        The JSON response as a Python object.
+        Parsed JSON response.
 
     Raises:
         ValueError: If the requested resource does not exist.
-        RuntimeError: If the GitHub API returns an unexpected error.
+        RuntimeError: If the API returns an unexpected error.
     """
+
     response = requests.get(url, timeout=TIMEOUT)
 
     if response.status_code == 200:
@@ -39,9 +40,11 @@ def get_user(username: str) -> dict:
         username: GitHub username.
 
     Returns:
-        A dictionary containing the user's information.
+        Dictionary containing user information.
     """
+
     url = f"{BASE_URL}/{username}"
+
     return _make_request(url)
 
 
@@ -53,7 +56,9 @@ def get_repositories(username: str) -> list[dict]:
         username: GitHub username.
 
     Returns:
-        A list of dictionaries containing repository information.
+        List of repositories.
     """
+
     url = f"{BASE_URL}/{username}/repos"
+
     return _make_request(url)
